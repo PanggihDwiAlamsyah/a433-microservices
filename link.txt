@@ -1,0 +1,8 @@
+Link packages di GitHub Container Registry:
+- karsajobs:
+  https://ghcr.io/panggihdwialamsyah/karsajobs:latest
+- karsajobs-ui:
+  https://ghcr.io/panggihdwialamsyah/karsajobs-ui:latest
+
+Link repository GitHub:
+https://github.com/PanggihDwiAlamsyah/a433-microservices
