@@ -1,0 +1,223 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongo
+spec:
+  serviceName: mongo
+  # Jumlah pod
+  replicas: 1
+  selector:
+    matchLabels:
+      # Pilih pod berdasarkan label
+      app: mongo
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      # Waktu grace sebelum shutdown
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: mongo
+          # Gunakan image MongoDB
+          image: mongo:7.0
+          ports:
+            - containerPort: 27017
+              name: mongo
+          # Ambil username & password dari secret
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME_FILE
+              value: /etc/mongo-credentials/MONGO_ROOT_USERNAME
+            - name: MONGO_INITDB_ROOT_PASSWORD_FILE
+              value: /etc/mongo-credentials/MONGO_ROOT_PASSWORD
+          volumeMounts:
+            - name: data
+              # Mount volume untuk data
+              mountPath: /data/db
+            - name: config
+              # Mount file konfigurasi
+              mountPath: /config
+            - name: secret
+              mountPath: /etc/mongo-credentials
+      volumes:
+        - name: config
+          configMap:
+            # Ambil dari ConfigMap
+            name: mongo-config
+            items:
+              - key: mongo.conf
+                path: mongo.conf
+        - name: data
+          persistentVolumeClaim:
+            # Gunakan PVC
+            claimName: mongo-pvc
+        - name: secret
+          secret:
+            secretName: mongo-secret
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# apiVersion: apps/v1
+# kind: StatefulSet
+# metadata:
+#   name: mongo
+#   namespace: karsajobs
+# spec:
+#   serviceName: mongo            # Harus sama dengan service headless
+#   replicas: 1                   # Jumlah pod
+#   selector:
+#     matchLabels:
+#       app: mongo                # Pilih pod berdasarkan label
+#   template:
+#     metadata:
+#       labels:
+#         app: mongo
+#     spec:
+#       terminationGracePeriodSeconds: 10  # Waktu grace sebelum shutdown
+#       containers:
+#       - name: mongo
+#         image: mongo:6.0                 # Gunakan image MongoDB
+#         command: ["mongod", "--config", "/config/mongo.conf"]  # Gunakan configMap
+#         ports:
+#           - containerPort: 27017
+#         env:                             # Ambil username & password dari secret
+#           - name: MONGO_INITDB_ROOT_USERNAME
+#             valueFrom:
+#               secretKeyRef:
+#                 name: mongo-secret
+#                 key: MONGO_INITDB_ROOT_USERNAME
+#           - name: MONGO_INITDB_ROOT_PASSWORD
+#             valueFrom:
+#               secretKeyRef:
+#                 name: mongo-secret
+#                 key: MONGO_INITDB_ROOT_PASSWORD
+#         volumeMounts:
+#           - name: data
+#             mountPath: /data/db         # Mount untuk penyimpanan data
+#           - name: config
+#             mountPath: /config          # Mount file konfigurasi
+#       volumes:
+#         - name: config
+#           configMap:
+#             name: mongo-config          # Ambil dari ConfigMap
+#         - name: data
+#           persistentVolumeClaim:
+#             claimName: mongo-pvc        # Gunakan PVC
+
+
+
+# apiVersion: apps/v1
+# kind: StatefulSet
+# metadata:
+#   name: mongo
+#   namespace: karsajobs
+# spec:
+#   serviceName: "mongo-service"
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: mongo
+#   template:
+#     metadata:
+#       labels:
+#         app: mongo
+#     spec:
+#       containers:
+#         - name: mongo
+#           image: mongo:6
+#           ports:
+#             - containerPort: 27017
+#           env:
+#             - name: MONGO_INITDB_ROOT_USERNAME
+#               valueFrom:
+#                 secretKeyRef:
+#                   name: mongo-secret
+#                   key: mongo-root-username
+#             - name: MONGO_INITDB_ROOT_PASSWORD
+#               valueFrom:
+#                 secretKeyRef:
+#                   name: mongo-secret
+#                   key: mongo-root-password
+#           volumeMounts:
+#             - name: mongo-storage
+#               mountPath: /data/db
+#   volumeClaimTemplates:
+#     - metadata:
+#         name: mongo-storage
+#       spec:
+#         accessModes: ["ReadWriteOnce"]
+#         resources:
+#           requests:
+#             storage: 1Gi
+#         storageClassName: ""
+
+
+
+
+
+
+
+
+
+
+
+# apiVersion: apps/v1
+# kind: StatefulSet
+# metadata:
+#   name: mongo
+#   namespace: karsajobs
+# spec:
+#   selector:
+#     matchLabels:
+#       app: mongo
+#   serviceName: "mongo-service"
+#   replicas: 1
+#   template:
+#     metadata:
+#       labels:
+#         app: mongo
+#     spec:
+#       containers:
+#         - name: mongo
+#           image: mongo:4.4
+#           ports:
+#             - containerPort: 27017
+#           env:
+#             - name: MONGO_INITDB_ROOT_USERNAME
+#               valueFrom:
+#                 secretKeyRef:
+#                   name: mongo-secret
+#                   key: mongo-root-username
+#             - name: MONGO_INITDB_ROOT_PASSWORD
+#               valueFrom:
+#                 secretKeyRef:
+#                   name: mongo-secret
+#                   key: mongo-root-password
+#           volumeMounts:
+#             - name: mongo-storage
+#               mountPath: /data/db
+#   volumeClaimTemplates:
+#     - metadata:
+#         name: mongo-storage
+#       spec:
+#         accessModes: [ "ReadWriteOnce" ]
+#         resources:
+#           requests:
+#             storage: 1Gi

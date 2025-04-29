@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+  selector:
+  # Pilih pod dengan label app=mongo
+    app: mongo                  
+  ports:
+   # Port default MongoDB
+    - port: 27017              
+      protocol: TCP
+      targetPort: 27017
+      name: mongo
+  type: ClusterIP

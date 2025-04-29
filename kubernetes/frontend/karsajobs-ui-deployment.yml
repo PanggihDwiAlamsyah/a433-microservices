@@ -1,0 +1,31 @@
+# Resource Deployment untuk mengatur frontend app
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  # Nama deployment
+  name: karsajobs-ui
+  # (opsional) namespace: bisa ditentukan jika ingin memisahkan namespace
+  # namespace: karsajobs
+spec:
+  # Jumlah replika pod frontend
+  replicas: 1
+  selector:
+    matchLabels:
+      app: karsajobs-ui
+  template:
+    metadata:
+      # Label untuk pod frontend
+      labels:
+        app: karsajobs-ui
+    spec:
+      containers:
+        - name: karsajobs-ui
+          # Gambar Vue.js frontend dari GitHub Container Registry
+          image: ghcr.io/panggihdwialamsyah/karsajobs-ui:latest
+          # Port yang diekspos di dalam container
+          ports:
+            - containerPort: 80
+          env:
+            # Environment variable untuk mengakses backend dari frontend
+            - name: VUE_APP_BACKEND
+              value: "http://192.168.49.2:30080"

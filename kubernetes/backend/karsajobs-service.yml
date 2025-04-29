@@ -1,0 +1,20 @@
+# Mendefinisikan jenis resource sebagai Service
+apiVersion: v1
+kind: Service
+# Metadata untuk penamaan service
+metadata:
+  name: karsajobs-service
+spec:
+  # Menunjukkan service ini akan mencari pod dengan label `app: karsajobs`
+  selector:
+    app: karsajobs
+  ports:
+    - protocol: TCP
+      # Port yang akan digunakan untuk mengakses service di dalam cluster
+      port: 8080
+      # Port yang dipetakan ke dalam container backend
+      targetPort: 8080
+      # Port yang akan diekspos ke luar node
+      nodePort: 30080
+  # Tipe Service untuk mengekspos aplikasi ke luar cluster melalui port tertentu
+  type: NodePort

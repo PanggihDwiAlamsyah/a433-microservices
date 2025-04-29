@@ -1,0 +1,46 @@
+# Mendefinisikan resource sebagai Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  # Nama deployment
+  name: karsajobs
+spec:
+  # Jumlah pod yang ingin dijalankan
+  replicas: 1
+  # Selektor label yang digunakan untuk mencocokkan pod
+  selector:
+    matchLabels:
+      app: karsajobs
+  template:
+    metadata:
+      # Label pod (harus sesuai dengan service)
+      labels:
+        app: karsajobs
+    spec:
+      containers:
+        - name: karsajobs
+          # Gambar container dari GitHub Container Registry
+          image: ghcr.io/panggihdwialamsyah/karsajobs:latest
+          # Selalu menarik image terbaru
+          imagePullPolicy: Always
+          # Port yang digunakan dalam container
+          ports:
+            - containerPort: 8080
+          # Daftar environment variables
+          env:
+            - name: APP_PORT
+              value: "8080"
+            - name: MONGO_HOST
+              value: mongodb
+            # Mengambil nilai dari secret untuk username MongoDB
+            - name: MONGO_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: MONGO_ROOT_USERNAME
+            # Mengambil nilai dari secret untuk password MongoDB
+            - name: MONGO_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: MONGO_ROOT_PASSWORD

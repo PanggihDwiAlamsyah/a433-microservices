@@ -1,0 +1,18 @@
+# Mendefinisikan resource sebagai Service
+apiVersion: v1
+kind: Service
+# Metadata untuk penamaan service
+metadata:
+  name: karsajobs-ui-service
+spec:
+  # Service akan mencari pod dengan label ini
+  selector:
+    app: karsajobs-ui
+  ports:
+    - protocol: TCP
+      # Port yang digunakan oleh service di dalam cluster
+      port: 80
+      # Port container Vue.js (frontend)
+      targetPort: 8000
+  # Mengekspose service ke luar node (port acak antara 30000–32767)
+  type: NodePort
