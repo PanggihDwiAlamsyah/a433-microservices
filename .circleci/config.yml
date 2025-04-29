@@ -1,0 +1,14 @@
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - run:
+          name: Set execute permission
+          command: chmod +x karsajobs-backend/build_push_image_karsajobs.sh
+      - run:
+          name: Build & Push Docker image (Backend)
+          command: ./karsajobs-backend/build_push_image_karsajobs.sh
