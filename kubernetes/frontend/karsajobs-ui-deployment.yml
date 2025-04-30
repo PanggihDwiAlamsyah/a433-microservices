@@ -24,7 +24,7 @@ spec:
           image: ghcr.io/panggihdwialamsyah/karsajobs-ui:latest
           # Port yang diekspos di dalam container
           ports:
-            - containerPort: 80
+            - containerPort: 8000
           env:
             # Environment variable untuk mengakses backend dari frontend
             - name: VUE_APP_BACKEND

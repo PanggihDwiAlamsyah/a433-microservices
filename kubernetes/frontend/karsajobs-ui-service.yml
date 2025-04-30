@@ -11,7 +11,7 @@ spec:
   ports:
     - protocol: TCP
       # Port yang digunakan oleh service di dalam cluster
-      port: 80
+      port: 8000
       # Port container Vue.js (frontend)
       targetPort: 8000
   # Mengekspose service ke luar node (port acak antara 30000–32767)
