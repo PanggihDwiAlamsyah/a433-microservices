@@ -1,34 +1,44 @@
+# Konfigurasi versi CircleCI yang digunakan
 version: 2.1
 
+# Definisi job linting Dockerfile menggunakan hadolint
 jobs:
   lint-dockerfile:
     docker:
+    # Menggunakan image Alpine Linux yang ringan
       - image: alpine
     steps:
+    # Mengambil source code dari repositori
       - checkout
       - run:
+      # Instalasi hadolint dari GitHub releases
           name: Install hadolint
           command: |
             apk add --no-cache curl
             curl -Lo /bin/hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
             chmod +x /bin/hadolint
       - run:
+      # Menjalankan pemeriksaan kualitas Dockerfile
           name: Lint Dockerfile
           command: hadolint Dockerfile
 
+  # Job untuk membangun image Docker frontend dan mengunggahnya ke GitHub Container Registry
   build-app-karsajobs-ui:
     docker:
       - image: cimg/base:stable
     steps:
       - checkout
+      # Mengaktifkan remote Docker engine untuk build image
       - setup_remote_docker
       - run:
+      # Build image dan push ke GitHub Container Registry
           name: Build and Push to GHCR
           command: |
             docker build -t ghcr.io/panggihdwialamsyah/karsajobs-ui:latest .
             echo $CR_PAT | docker login ghcr.io -u panggihdwialamsyah --password-stdin
             docker push ghcr.io/panggihdwialamsyah/karsajobs-ui:latest
 
+# Workflow utama untuk pipeline karsajobs-ui
 workflows:
   karsajobs-ui:
     jobs:
