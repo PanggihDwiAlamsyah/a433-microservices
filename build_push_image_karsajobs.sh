@@ -15,3 +15,4 @@ docker push $IMAGE_NAME:latest
 
 # Menampilkan info
 echo "Image pushed to GitHub Packages: $IMAGE_NAME:latest"
+
