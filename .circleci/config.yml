@@ -1,50 +1,85 @@
 version: 2.1
 
-executors:
-  go-executor:
-    docker:
-      - image: cimg/go:1.20
-
 jobs:
-  lint-dockerfile:
-    docker:
-      - image: alpine
-    steps:
-      - checkout
-      - run:
-          name: Install hadolint
-          command: |
-            apk add --no-cache curl
-            curl -Lo /bin/hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
-            chmod +x /bin/hadolint
-      - run:
-          name: Lint Dockerfile
-          command: hadolint Dockerfile
-
-  test-app:
-    executor: go-executor
-    steps:
-      - checkout
-      - run:
-          name: Run Go Unit Tests
-          command: go test -v -short --count=1 $(go list ./...)
-
-  build-app-karsajobs:
+  build:
     docker:
       - image: cimg/base:stable
     steps:
       - checkout
-      - setup_remote_docker
       - run:
-          name: Build and Push to GHCR
+          name: Install Docker CLI
           command: |
-            docker build -t ghcr.io/panggihdwialamsyah/karsajobs:latest .
-            echo $CR_PAT | docker login ghcr.io -u panggihdwialamsyah --password-stdin
-            docker push ghcr.io/panggihdwialamsyah/karsajobs:latest
+            sudo apt-get update
+            sudo apt-get install -y docker.io
+      - run:
+          name: Lint Dockerfile
+          command: |
+            sudo wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
+            sudo chmod +x /bin/hadolint
+            hadolint Dockerfile
+      - run:
+          name: Unit Test (Go)
+          command: go test -v -short --count=1 $(go list ./...)
+      - run:
+          name: Build & Push Docker Image
+          command: ./build_push_image_karsajobs.sh
 
 workflows:
-  karsajobs:
+  version: 2
+  build_and_push:
     jobs:
-      - lint-dockerfile
-      - test-app
-      - build-app-karsajobs
+      - build
+
+
+
+
+# version: 2.1
+
+# executors:
+#   go-executor:
+#     docker:
+#       - image: cimg/go:1.20
+
+# jobs:
+#   lint-dockerfile:
+#     docker:
+#       - image: alpine
+#     steps:
+#       - checkout
+#       - run:
+#           name: Install hadolint
+#           command: |
+#             apk add --no-cache curl
+#             curl -Lo /bin/hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
+#             chmod +x /bin/hadolint
+#       - run:
+#           name: Lint Dockerfile
+#           command: hadolint Dockerfile
+
+#   test-app:
+#     executor: go-executor
+#     steps:
+#       - checkout
+#       - run:
+#           name: Run Go Unit Tests
+#           command: go test -v -short --count=1 $(go list ./...)
+
+#   build-app-karsajobs:
+#     docker:
+#       - image: cimg/base:stable
+#     steps:
+#       - checkout
+#       - setup_remote_docker
+#       - run:
+#           name: Build and Push to GHCR
+#           command: |
+#             docker build -t ghcr.io/panggihdwialamsyah/karsajobs:latest .
+#             echo $CR_PAT | docker login ghcr.io -u panggihdwialamsyah --password-stdin
+#             docker push ghcr.io/panggihdwialamsyah/karsajobs:latest
+
+# workflows:
+#   karsajobs:
+#     jobs:
+#       - lint-dockerfile
+#       - test-app
+#       - build-app-karsajobs
