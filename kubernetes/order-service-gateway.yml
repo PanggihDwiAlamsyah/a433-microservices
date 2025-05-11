@@ -1,0 +1,36 @@
+# Mendefinisikan Istio Gateway untuk Order Service
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: order-service-gw
+spec:
+  selector:
+    istio: ingressgateway # Menggunakan Istio Ingress Gateway
+  servers:
+    - port:
+        number: 80 # Mengekspos trafik HTTP pada port 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "*" # Mengizinkan semua host untuk mengakses layanan
+
+---
+# Mendefinisikan VirtualService untuk Order Service
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: order-service-vs
+spec:
+  hosts:
+    - "*" # Mengizinkan semua host
+  gateways:
+    - order-service-gw # Menggunakan gateway yang telah didefinisikan
+  http:
+    - match:
+        - uri:
+            exact: /order # Mencocokkan permintaan dengan path /order
+      route:
+        - destination:
+            host: order-service # Mengarahkan trafik ke Order Service
+            port:
+              number: 3000 # Mengarahkan ke port 3000

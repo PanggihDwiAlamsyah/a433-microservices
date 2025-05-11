@@ -1,0 +1,58 @@
+# Mendefinisikan sebuah Service untuk Shipping Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: shipping-service
+  labels:
+    app: shipping-service
+    tier: consumer
+spec:
+  selector: # Memilih pod berdasarkan label yang sesuai
+    app: shipping-service
+    tier: consumer
+  ports:
+    - name: http-nodejs
+      port: 3001 # Mengekspos layanan pada port 3001
+
+---
+# Mendefinisikan Deployment untuk Shipping Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shipping-service
+  labels:
+    app: shipping-service
+    tier: consumer
+spec:
+  replicas: 1 # Menjalankan satu replika dari Shipping Service
+  selector:
+    matchLabels:
+      app: shipping-service
+      tier: consumer
+  template:
+    metadata:
+      labels:
+        app: shipping-service
+        tier: consumer
+    spec:
+      initContainers:
+        - name: wait-for-rabbitmq
+          image: busybox
+          command: ['sh', '-c', 'until nc -z rabbitmq-headless 5672; do echo waiting for rabbitmq; sleep 2; done;']
+          # Init container ini memastikan RabbitMQ sudah berjalan sebelum Shipping Service dimulai
+      containers:
+        - name: shipping-service
+          image: ghcr.io/panggihdwialamsyah/shipping-service:latest # Menggunakan image dari registry
+          ports:
+            - containerPort: 3001 # Mengekspos port 3001 di dalam container
+          env:
+            - name: AMQP_USER
+              value: "user" # Username untuk koneksi RabbitMQ
+            - name: AMQP_PASSWORD
+              value: "user" # Password untuk koneksi RabbitMQ
+            - name: AMQP_HOST
+              value: "rabbitmq-headless" # Host RabbitMQ
+            - name: AMQP_PORT
+              value: "5672" # Port RabbitMQ
+            - name: AMQP_URL
+              value: "amqp://user:user@rabbitmq-headless:5672/" # URL koneksi RabbitMQ

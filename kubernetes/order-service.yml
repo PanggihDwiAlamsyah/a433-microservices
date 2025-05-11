@@ -1,0 +1,47 @@
+# Mendefinisikan sebuah Service untuk Order Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+  labels:
+    app: order-service
+    tier: producer
+spec:
+  selector: # Memilih pod berdasarkan label yang sesuai
+    app: order-service
+    tier: producer
+  ports:
+    - name: http-nodejs
+      port: 3000 # Mengekspos layanan pada port 3000
+
+---
+# Mendefinisikan Deployment untuk Order Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+  labels:
+    app: order-service
+    tier: producer
+spec:
+  replicas: 1 # Menjalankan satu replika dari Order Service
+  selector:
+    matchLabels:
+      app: order-service
+      tier: producer
+  template:
+    metadata:
+      labels:
+        app: order-service
+        tier: producer
+    spec:
+      containers:
+        - name: order-service
+          image: ghcr.io/panggihdwialamsyah/order-service:latest # Menggunakan image dari registry
+          ports:
+            - containerPort: 3000 # Mengekspos port 3000 di dalam container
+          env:
+            - name: AMQP_PASSWORD
+              value: "user" # Password untuk koneksi RabbitMQ
+            - name: AMQP_URL
+              value: "amqp://user:user@rabbitmq-headless:5672/" # URL koneksi RabbitMQ

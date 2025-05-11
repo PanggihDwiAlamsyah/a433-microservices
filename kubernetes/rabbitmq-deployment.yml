@@ -1,0 +1,43 @@
+# Mendefinisikan StatefulSet untuk RabbitMQ
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: rabbitmq
+spec:
+  selector:
+    matchLabels:
+      app: rabbitmq
+  serviceName: rabbitmq-headless # Menggunakan headless service untuk komunikasi antar pod
+  replicas: 1 # Menjalankan satu replika RabbitMQ
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      containers:
+        - name: rabbitmq
+          image: rabbitmq:3-management # Menggunakan image RabbitMQ dengan UI management
+          ports:
+            - containerPort: 5672 # Port untuk komunikasi AMQP
+            - containerPort: 15672 # Port untuk UI management RabbitMQ
+          env:
+            - name: RABBITMQ_DEFAULT_USER
+              value: user # Username default RabbitMQ
+            - name: RABBITMQ_DEFAULT_PASS
+              value: user # Password default RabbitMQ
+
+---
+# Mendefinisikan Headless Service untuk RabbitMQ
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq-headless
+spec:
+  clusterIP: None # Headless service untuk memungkinkan komunikasi langsung antar pod
+  selector:
+    app: rabbitmq
+  ports:
+    - port: 5672
+      name: amqp # Port untuk komunikasi AMQP
+    - port: 15672
+      name: management # Port untuk UI management RabbitMQ
