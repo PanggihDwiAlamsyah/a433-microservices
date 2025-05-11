@@ -1,0 +1,47 @@
+version: 2.1
+
+executors:
+  docker-executor:
+    docker:
+      - image: circleci/node:18
+
+jobs:
+  build:
+    executor: docker-executor
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build Docker Image
+          command: |
+            docker build -t ghcr.io/panggihdwialamsyah/order-service:latest .
+      - run:
+          name: Push to GHCR
+          command: |
+            echo $GHCR_TOKEN | docker login ghcr.io -u $GHCR_USER --password-stdin
+            docker push ghcr.io/panggihdwialamsyah/order-service:latest
+
+  deploy:
+    executor: docker-executor
+    steps:
+      - checkout
+      - run:
+          name: Setup Kubernetes Context
+          command: |
+            echo "$KUBECONFIG_DATA" | base64 --decode > ~/.kube/config
+            kubectl config use-context my-cluster
+      - run:
+          name: Deploy Order Service
+          command: |
+            kubectl apply -f kubernetes/order-service.yml
+            kubectl apply -f kubernetes/order-service-gateway.yml
+            kubectl rollout status deployment/order-service
+
+workflows:
+  version: 2
+  ci_cd_pipeline:
+    jobs:
+      - build
+      - deploy:
+          requires:
+            - build
